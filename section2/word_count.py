@@ -23,6 +23,7 @@ for word, count in wordCounts.items():
 ############################### Now we improve it a little
 #
 # a little better in terms of findin actual words
+# this still leave word that don't make sense.. so results should be checked and cleaned further
 def normalizeWords(text):
     return re.compile(r'\W+', re.UNICODE).split(text.lower())
 #
