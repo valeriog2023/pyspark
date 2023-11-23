@@ -32,7 +32,8 @@ minTemps = parsedLines.filter(lambda x: "TMIN" in x[1])
 stationTemps = minTemps.map(lambda x: (x[0], x[2]))
 #
 # here we aggregate and compare the keys and get the 
-# for each key (sation) the min temperature recorded
+# for each key (staion) the min temperature recorded
+# note you always need 2 values in the lambda to compare 2 entries 
 minTemps = stationTemps.reduceByKey(lambda x, y: min(x,y))
 results = minTemps.collect();                       # -> action
 
