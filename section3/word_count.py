@@ -41,7 +41,7 @@ wordsDF.show()
 # now we clean it up (make all lower) and group
 # this is simlar to pandas, i.e. wordsDF.word != "" returns a boolean df
 # and then you use to filter (get back only where we had true values)
-wordsDF.filter(wordsDF.words != "")
+wordsDF = wordsDF.filter(wordsDF.words != "")
 wordsDF = wordsDF.select(func.lower(wordsDF.words).alias("words"))
 
 #
@@ -50,3 +50,6 @@ wordsDF = wordsDF.select(func.lower(wordsDF.words).alias("words"))
 # to get the most used we need to apply desc to the col.. abit complicated if you ask me
 wordsDF.groupBy("words").count().sort("count").show()
 wordsDF.groupBy("words").count().sort(func.col("count").desc()).show()
+#
+# this is to show all the words
+wordsDF.show(wordsDF.count())
