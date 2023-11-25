@@ -13,7 +13,7 @@ spark.sparkContext.setLogLevel("WARN")
 # 2,Hugh,55,221
 # 3,Deanna,40,465
 #
-# we also ask spark to infer a schema
+# we also ask spark to infer a schema (you can provide your own schema)
 people = spark.read.option("header", "true").option("inferSchema", "true") \
             .csv("dataset/fakefriends-header.csv")
 print("----------------")
