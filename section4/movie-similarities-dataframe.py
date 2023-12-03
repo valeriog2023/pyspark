@@ -3,15 +3,26 @@ from pyspark.sql import functions as func
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, LongType
 import sys
 
-
+#
+# note that .master("local[*]") means use every cpu on the local system
+#      remember that if you run on a cluster, you don't want to constraint it to local
 spark = SparkSession.builder.appName("MovieSimilarities").master("local[*]").getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
 
+#
+# note: data is in the format:
+# 1|Toy Story (1995)|01-Jan-1995||http://us.imdb.com/M/title-exact?Toy%20Story%20(1995)|0|0|0|1|1|1|0|0|0|0|0|0|0|0|0|0|0|0|0
+# 2|GoldenEye (1995)|01-Jan-1995||http://us.imdb.com/M/title-exact?GoldenEye%20(1995)|0|1|1|0|0|0|0|0|0|0|0|0|0|0|0|0|1|0|0
+# we only get the first 2 values
 movieNamesSchema = StructType([ \
                                StructField("movieID", IntegerType(), True), \
                                StructField("movieTitle", StringType(), True) \
                                ])
-
+#note: this data is in the format
+# 196	242	3	881250949
+# 186	302	3	891717742
+# 22	377	1	878887116
+# 244	51	2	880606923
 moviesSchema = StructType([ \
                      StructField("userID", IntegerType(), True), \
                      StructField("movieID", IntegerType(), True), \
@@ -25,6 +36,14 @@ movieNames = spark.read \
       .option("charset", "ISO-8859-1") \
       .schema(movieNamesSchema) \
       .csv("dataset/ml-100k/u.item")
+
+#
+# Load up movie data as dataset
+movies = spark.read \
+           .option("sep", "\t") \
+              .schema(moviesSchema).csv("dataset/ml-100k/u.data")
+
+
 
 def computeCosineSimilarity(spark, data):
     # Compute xx, xy and yy columns
@@ -72,10 +91,6 @@ def getMovieName(movieNames, movieId):
 
 
 
-
-
-# Load up movie data as dataset
-movies = spark.read.option("sep", "\t").schema(moviesSchema).csv("file:///SparkCourse/ml-100k/u.data")
 
 
 ratings = movies.select("userId", "movieId", "rating")
