@@ -87,6 +87,8 @@ def bfsMap(node):
             Note: I'm pretty sure this can create loop since it
                   does not check if the new connection row has
                   been parsed already or not
+                  Note: a follow up function removes the duplications
+                        before the new iteration starts
           - one row for itself with same values but black color
           - if the targetCharacterID is a connection it adds 1
             to the hitCounter to
@@ -189,7 +191,7 @@ if __name__ == "__main__":
         mapped = iterationRdd.flatMap(bfsMap)
 
         # Note that mapped.count() action here forces the RDD to be evaluated, and
-        # that's the only reason our accumulator is actually updated.        
+        # that's the only reason our accumulator is actually updated.
         print("Processing " + str(mapped.count()) + " values.")
 
         #
