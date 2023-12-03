@@ -3,6 +3,25 @@ from pyspark.sql import functions as func
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, LongType
 import sys
 
+
+###########################################
+## RUN WITH:
+## spark-submit section4/movie-similarities-dataframe.py  <movie_id>
+##
+## e.g. spark-submit section4/movie-similarities-dataframe.py 50
+## Top 10 similar movies for Star Wars (1977)
+##   Empire Strikes Back, The (1980) score: 0.9895522078385338       strength: 345
+##   Return of the Jedi (1983)       score: 0.9857230861253026       strength: 480
+##   Raiders of the Lost Ark (1981)  score: 0.981760098872619        strength: 380
+##   20,000 Leagues Under the Sea (1954)     score: 0.9789385605497993       strength: 68
+##   12 Angry Men (1957)     score: 0.9776576120448436       strength: 109
+##   Close Shave, A (1995)   score: 0.9775948291054827       strength: 92
+##   African Queen, The (1951)       score: 0.9764692222674887       strength: 138
+##   Sting, The (1973)       score: 0.9751512937740359       strength: 204
+##   Wrong Trousers, The (1993)      score: 0.9748681355460885       strength: 103
+##   Wallace & Gromit: The Best of Aardman Animation (1996)  score: 0.9741816128302572       strength: 58
+##
+###########################################
 #
 # note that .master("local[*]") means use every cpu on the local system
 #      remember that if you run on a cluster, you don't want to constraint it to local
@@ -54,7 +73,9 @@ def computeCosineSimilarity(spark, data):
       .withColumn("xy", func.col("rating1") * func.col("rating2"))
 
     # Compute numerator, denominator and numPairs columns
-    # this groups the movie pairs and replaces the individual ratings
+    # this groups the movie pairs, e.g.
+    # all (movieA,movieB) pairs with their ratings from different users
+    # and replaces the individual ratings
     # with
     #  - in the numerator column: the sum of the xy column
     #  - in the denominator column:
@@ -118,7 +139,9 @@ moviePairSimilarities = computeCosineSimilarity(spark, moviePairs).cache()
 
 
 if (len(sys.argv) > 1):
+    # only considering similarity score above 97%
     scoreThreshold = 0.97
+    # only considering suggestions with at least 50 users
     coOccurrenceThreshold = 50.0
 
     movieID = int(sys.argv[1])
@@ -126,10 +149,12 @@ if (len(sys.argv) > 1):
     # Filter for movies with this sim that are "good" as defined by
     # our quality thresholds above
     filteredResults = moviePairSimilarities.filter(
+          # film id is in either movie1 column or movie2 column
           ((func.col("movie1") == movieID) | (func.col("movie2") == movieID)) & \
           (func.col("score") > scoreThreshold) & (func.col("numPairs") > coOccurrenceThreshold))
 
     # Sort by quality score.
+    # note the take(10) function
     results = filteredResults.sort(func.col("score").desc()).take(10)
 
     print ("Top 10 similar movies for " + getMovieName(movieNames, movieID))
