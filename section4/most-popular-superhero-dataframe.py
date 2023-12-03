@@ -66,10 +66,14 @@ ids_with_least_connections.show()
 #
 # here we run a join
 # join(self, other, on=None, how=None)
+#
+# Note another way to run the join is
+# df1.join(<df2>, <column_name>)
 heros_with_least_connections = ids_with_least_connections.join(names, # second df
                                                              ids_with_least_connections.id == names.id # on
                                                              # default is inner join which is alright
                                                             ).select("name")
+
 print(f"These heros have all {leastConnections[0]} co-appearances.")
 heros_with_least_connections.show()
 
