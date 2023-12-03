@@ -32,3 +32,13 @@ Item based Collaborative Filtering wiht Pyspark
     use as group function the similarity score 
 - filter, sort and display results      
 
+
+=================================================
+Caching Datasets
+=================================================
+If you are using the dataset more than once, you should cache it
+or spark will run all the steps toc reate it, again
+Use:
+- cache (only in memory)
+- persist (can save to a filesystem)
+
