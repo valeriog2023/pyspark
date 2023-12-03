@@ -32,16 +32,17 @@ moviesSchema = StructType([ \
 # Create a broadcast dataset of movieID and movieTitle.
 # Apply ISO-885901 charset
 movieNames = spark.read \
-      .option("sep", "|") \
-      .option("charset", "ISO-8859-1") \
-      .schema(movieNamesSchema) \
-      .csv("dataset/ml-100k/u.item")
+        .option("sep", "|") \
+          .option("charset", "ISO-8859-1") \
+            .schema(movieNamesSchema) \
+              .csv("dataset/ml-100k/u.item")
 
 #
 # Load up movie data as dataset
 movies = spark.read \
            .option("sep", "\t") \
-              .schema(moviesSchema).csv("dataset/ml-100k/u.data")
+              .schema(moviesSchema) \
+                .csv("dataset/ml-100k/u.data")
 
 
 
@@ -92,7 +93,8 @@ def getMovieName(movieNames, movieId):
 
 
 
-
+#
+# best practice is to reduce the data by removing what you don't need
 ratings = movies.select("userId", "movieId", "rating")
 
 # Emit every movie rated together by the same user.
@@ -102,7 +104,7 @@ moviePairs = ratings.alias("ratings1") \
                     .join(ratings.alias("ratings2"),
                           # join based on same user id
                          (func.col("ratings1.userId") == func.col("ratings2.userId")) \
-                          # this actually avoids duplicates and entreis with same movieId
+                          # this actually avoids duplicates and entries with same movieId
                          & (func.col("ratings1.movieId") < func.col("ratings2.movieId"))
                         ).select(func.col("ratings1.movieId").alias("movie1"),
                                  func.col("ratings2.movieId").alias("movie2"),
